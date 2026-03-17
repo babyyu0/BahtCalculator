@@ -3,48 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>바트 ↔ 원 환율 계산기</title>
+  <title>바트 원 환율 계산기</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --text-main: #1f2a44;
+      --text-muted: #5d6a82;
+      --mint: #3fc8b2;
+      --panel: rgba(255, 255, 255, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.95);
+      --soft-shadow: 0 22px 45px rgba(39, 67, 141, 0.24);
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      background:
+        radial-gradient(circle at 10% 15%, #fff7b8 0%, rgba(255, 247, 184, 0) 44%),
+        radial-gradient(circle at 88% 16%, #ffc7e3 0%, rgba(255, 199, 227, 0) 42%),
+        linear-gradient(140deg, #b7f3ea 0%, #c8d6ff 48%, #ffe0b9 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      z-index: 0;
+      filter: blur(2px);
+      animation: floatBlob 11s ease-in-out infinite;
+    }
+
+    body::before {
+      left: -110px;
+      bottom: -80px;
+      background: rgba(255, 157, 129, 0.33);
+    }
+
+    body::after {
+      right: -90px;
+      top: -80px;
+      background: rgba(126, 168, 255, 0.36);
+      animation-delay: 1.7s;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 36px;
+      position: relative;
+      z-index: 1;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 28px;
+      padding: 34px;
       width: 100%;
       max-width: 460px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(9px);
     }
 
     h1 {
-      color: #fff;
-      font-size: 1.5rem;
-      font-weight: 700;
+      color: var(--text-main);
+      font-size: 1.6rem;
+      font-weight: 800;
       text-align: center;
       margin-bottom: 6px;
+      letter-spacing: -0.015em;
     }
 
     .subtitle {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 26px;
     }
 
     .rate-bar {
@@ -52,30 +90,24 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      background: rgba(255, 255, 255, 0.07);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 28px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(157, 186, 255, 0.4);
+      border-radius: 13px;
+      padding: 12px 15px;
+      margin-bottom: 24px;
     }
 
     .rate-badge {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #a78bfa;
-      background: rgba(167, 139, 250, 0.15);
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
-    .rate-text {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.85rem;
-    }
-
-    #rateValue {
-      color: #fff;
+      font-size: 0.74rem;
       font-weight: 700;
+      color: #186c5f;
+      background: rgba(63, 200, 178, 0.2);
+      padding: 4px 9px;
+      border-radius: 7px;
     }
+
+    .rate-text { color: #4d5f7f; font-size: 0.86rem; }
+    #rateValue { color: var(--text-main); font-weight: 800; }
 
     .rate-update-btn {
       margin-left: auto;
@@ -83,53 +115,42 @@
       border: none;
       cursor: pointer;
       font-size: 1rem;
-      opacity: 0.6;
+      opacity: 0.74;
       transition: opacity 0.2s, transform 0.3s;
-      color: white;
+      color: #4265b3;
       padding: 2px;
     }
 
     .rate-update-btn:hover { opacity: 1; }
     .rate-update-btn.spinning { animation: spin 0.8s linear; }
 
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-
-    .field {
-      margin-bottom: 16px;
-    }
+    .field { margin-bottom: 16px; }
 
     label {
       display: flex;
       align-items: center;
       gap: 6px;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.8rem;
-      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.79rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-bottom: 8px;
     }
 
-    .flag { font-size: 1.1rem; }
-
-    .input-wrap {
-      position: relative;
-    }
+    .input-wrap { position: relative; }
 
     input[type="number"] {
       width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #ffffff;
+      border: 1px solid rgba(126, 168, 255, 0.48);
       border-radius: 14px;
       padding: 14px 56px 14px 18px;
       font-size: 1.25rem;
-      font-weight: 600;
-      color: #fff;
+      font-weight: 700;
+      color: #283557;
       outline: none;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       -moz-appearance: textfield;
     }
 
@@ -137,8 +158,8 @@
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
     input[type="number"]:focus {
-      border-color: rgba(167, 139, 250, 0.6);
-      background: rgba(255, 255, 255, 0.11);
+      border-color: var(--mint);
+      box-shadow: 0 0 0 4px rgba(63, 200, 178, 0.18);
     }
 
     .currency-tag {
@@ -146,9 +167,9 @@
       right: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(255, 255, 255, 0.4);
+      color: #8091b0;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       pointer-events: none;
     }
 
@@ -157,25 +178,25 @@
       align-items: center;
       justify-content: center;
       margin: 8px auto;
-      width: 40px;
-      height: 40px;
-      background: rgba(167, 139, 250, 0.2);
-      border: 1px solid rgba(167, 139, 250, 0.3);
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(145deg, #ffe6db, #dff8f4);
+      border: 1px solid rgba(255, 142, 114, 0.35);
       border-radius: 50%;
       cursor: pointer;
       font-size: 1rem;
-      color: #a78bfa;
-      transition: background 0.2s, transform 0.2s;
+      color: #dd6f53;
+      transition: transform 0.25s, box-shadow 0.2s;
     }
 
     .swap-btn:hover {
-      background: rgba(167, 139, 250, 0.35);
-      transform: rotate(180deg);
+      transform: rotate(180deg) scale(1.06);
+      box-shadow: 0 8px 16px rgba(221, 111, 83, 0.26);
     }
 
     .result-box {
-      background: rgba(167, 139, 250, 0.1);
-      border: 1px solid rgba(167, 139, 250, 0.25);
+      background: linear-gradient(135deg, rgba(126, 168, 255, 0.17), rgba(63, 200, 178, 0.16));
+      border: 1px solid rgba(126, 168, 255, 0.35);
       border-radius: 16px;
       padding: 18px 20px;
       margin-top: 24px;
@@ -183,21 +204,21 @@
     }
 
     .result-label {
-      color: rgba(255, 255, 255, 0.5);
+      color: #60759c;
       font-size: 0.8rem;
       margin-bottom: 6px;
     }
 
     .result-value {
-      color: #a78bfa;
+      color: #226f91;
       font-size: 2rem;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
 
     .result-unit {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.85rem;
+      color: #60759c;
+      font-size: 0.84rem;
       margin-top: 4px;
     }
 
@@ -209,7 +230,7 @@
     }
 
     .quick-btns span {
-      color: rgba(255, 255, 255, 0.4);
+      color: #677892;
       font-size: 0.75rem;
       align-self: center;
       margin-right: 2px;
@@ -218,25 +239,25 @@
     .quick-btn {
       flex: 1;
       min-width: 60px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.73);
+      border: 1px solid rgba(126, 168, 255, 0.44);
       border-radius: 10px;
-      color: rgba(255, 255, 255, 0.7);
+      color: #3f5273;
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       padding: 8px 4px;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transition: transform 0.16s, border-color 0.2s, background 0.2s;
     }
 
     .quick-btn:hover {
-      background: rgba(167, 139, 250, 0.2);
-      color: #fff;
-      border-color: rgba(167, 139, 250, 0.4);
+      background: #fff;
+      border-color: rgba(63, 200, 178, 0.7);
+      transform: translateY(-2px);
     }
 
     .error-msg {
-      color: #f87171;
+      color: #d24444;
       font-size: 0.78rem;
       text-align: center;
       margin-top: 8px;
@@ -244,162 +265,183 @@
     }
 
     .footer {
-      color: rgba(255, 255, 255, 0.2);
-      font-size: 0.7rem;
+      color: #7a8aa4;
+      font-size: 0.71rem;
       text-align: center;
       margin-top: 24px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes floatBlob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 28px 22px; border-radius: 22px; }
+      .quick-btn { min-width: 72px; }
     }
   </style>
 </head>
 <body>
-<div class="card">
-  <h1>🇹🇭 ↔ 🇰🇷 환율 계산기</h1>
-  <p class="subtitle">태국 바트 · 한국 원</p>
+  <div class="card">
+    <h1>바트 ↔ 원 환율 계산기</h1>
+    <p class="subtitle">태국 바트 · 한국 원</p>
 
-  <div class="rate-bar">
-    <span class="rate-badge">실시간</span>
-    <span class="rate-text">1 THB = <span id="rateValue">-</span> KRW</span>
-    <button class="rate-update-btn" id="refreshBtn" title="환율 새로고침">🔄</button>
-  </div>
-
-  <div class="field">
-    <label><span class="flag">🇹🇭</span> 태국 바트 (THB)</label>
-    <div class="input-wrap">
-      <input type="number" id="thbInput" placeholder="0" min="0" />
-      <span class="currency-tag">THB</span>
+    <div class="rate-bar">
+      <span class="rate-badge">실시간</span>
+      <span class="rate-text">1 THB = <span id="rateValue">-</span> KRW</span>
+      <button class="rate-update-btn" id="refreshBtn" title="환율 새로고침">↻</button>
     </div>
-  </div>
 
-  <button class="swap-btn" id="swapBtn" title="방향 전환">⇅</button>
-
-  <div class="field">
-    <label><span class="flag">🇰🇷</span> 한국 원 (KRW)</label>
-    <div class="input-wrap">
-      <input type="number" id="krwInput" placeholder="0" min="0" />
-      <span class="currency-tag">KRW</span>
+    <div class="field">
+      <label>태국 바트 (THB)</label>
+      <div class="input-wrap">
+        <input type="number" id="thbInput" placeholder="0" min="0" />
+        <span class="currency-tag">THB</span>
+      </div>
     </div>
+
+    <button class="swap-btn" id="swapBtn" type="button" title="입력 방향 전환">↕</button>
+
+    <div class="field">
+      <label>한국 원 (KRW)</label>
+      <div class="input-wrap">
+        <input type="number" id="krwInput" placeholder="0" min="0" />
+        <span class="currency-tag">KRW</span>
+      </div>
+    </div>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-label">변환 결과</div>
+      <div class="result-value" id="resultValue">—</div>
+      <div class="result-unit" id="resultUnit"></div>
+    </div>
+
+    <div class="quick-btns">
+      <span>빠른 입력</span>
+      <button class="quick-btn" type="button" data-thb="100">100 THB</button>
+      <button class="quick-btn" type="button" data-thb="500">500 THB</button>
+      <button class="quick-btn" type="button" data-thb="1000">1,000 THB</button>
+      <button class="quick-btn" type="button" data-thb="5000">5,000 THB</button>
+      <button class="quick-btn" type="button" data-thb="10000">10,000 THB</button>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="footer" id="rateTime">환율 정보를 불러오는 중...</div>
   </div>
 
-  <div class="result-box" id="resultBox">
-    <div class="result-label">변환 결과</div>
-    <div class="result-value" id="resultValue">—</div>
-    <div class="result-unit" id="resultUnit"></div>
-  </div>
+  <script>
+    let thbToKrw = null;
+    let activeField = "thb";
 
-  <div class="quick-btns">
-    <span>빠른 입력</span>
-    <button class="quick-btn" data-thb="100">100 ฿</button>
-    <button class="quick-btn" data-thb="500">500 ฿</button>
-    <button class="quick-btn" data-thb="1000">1,000 ฿</button>
-    <button class="quick-btn" data-thb="5000">5,000 ฿</button>
-    <button class="quick-btn" data-thb="10000">10,000 ฿</button>
-  </div>
+    const thbInput = document.getElementById("thbInput");
+    const krwInput = document.getElementById("krwInput");
+    const rateValue = document.getElementById("rateValue");
+    const resultValue = document.getElementById("resultValue");
+    const resultUnit = document.getElementById("resultUnit");
+    const errorMsg = document.getElementById("errorMsg");
+    const rateTime = document.getElementById("rateTime");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const swapBtn = document.getElementById("swapBtn");
 
-  <div class="error-msg" id="errorMsg"></div>
-  <div class="footer" id="rateTime">환율 정보를 불러오는 중…</div>
-</div>
+    async function fetchRate() {
+      refreshBtn.classList.add("spinning");
+      errorMsg.textContent = "";
+      try {
+        const res = await fetch("https://open.er-api.com/v6/latest/THB");
+        if (!res.ok) throw new Error("응답 오류");
+        const data = await res.json();
+        if (data.result !== "success") throw new Error("데이터 오류");
 
-<script>
-  // ── 상태 ──────────────────────────────────────────────
-  let thbToKrw = null;  // 1 THB → KRW
-  let activeField = 'thb'; // 마지막으로 편집한 필드
-
-  const thbInput   = document.getElementById('thbInput');
-  const krwInput   = document.getElementById('krwInput');
-  const rateValue  = document.getElementById('rateValue');
-  const resultValue= document.getElementById('resultValue');
-  const resultUnit = document.getElementById('resultUnit');
-  const errorMsg   = document.getElementById('errorMsg');
-  const rateTime   = document.getElementById('rateTime');
-  const refreshBtn = document.getElementById('refreshBtn');
-
-  // ── 환율 조회 ─────────────────────────────────────────
-  async function fetchRate() {
-    refreshBtn.classList.add('spinning');
-    errorMsg.textContent = '';
-    try {
-      // 무료 오픈 API (CORS 허용, API 키 불필요)
-      const res = await fetch('https://open.er-api.com/v6/latest/THB');
-      if (!res.ok) throw new Error('응답 오류');
-      const data = await res.json();
-      if (data.result !== 'success') throw new Error('데이터 오류');
-      thbToKrw = data.rates['KRW'];
-      rateValue.textContent = thbToKrw.toFixed(2);
-      const updated = new Date(data.time_last_update_utc);
-      rateTime.textContent = `마지막 업데이트: ${updated.toLocaleString('ko-KR')}`;
-      recalculate();
-    } catch (e) {
-      // 네트워크 실패 시 최근 고정값 사용
-      if (!thbToKrw) {
-        thbToKrw = 38.5; // 오프라인 폴백
+        thbToKrw = data.rates.KRW;
         rateValue.textContent = thbToKrw.toFixed(2);
-        rateTime.textContent = '오프라인 모드 (기본값 사용)';
-      }
-      errorMsg.textContent = '실시간 환율 조회 실패. 최근 값을 사용합니다.';
-      recalculate();
-    } finally {
-      refreshBtn.classList.remove('spinning');
-    }
-  }
-
-  // ── 계산 ──────────────────────────────────────────────
-  function fmt(n) {
-    return n.toLocaleString('ko-KR', { maximumFractionDigits: 2 });
-  }
-
-  function recalculate() {
-    if (!thbToKrw) return;
-
-    if (activeField === 'thb') {
-      const thb = parseFloat(thbInput.value);
-      if (!isNaN(thb) && thb >= 0) {
-        const krw = thb * thbToKrw;
-        krwInput.value = '';
-        resultValue.textContent = fmt(krw) + ' ₩';
-        resultUnit.textContent  = `${fmt(thb)} ฿ → ${fmt(krw)} ₩`;
-      } else {
-        resultValue.textContent = '—';
-        resultUnit.textContent  = '';
-      }
-    } else {
-      const krw = parseFloat(krwInput.value);
-      if (!isNaN(krw) && krw >= 0) {
-        const thb = krw / thbToKrw;
-        thbInput.value = '';
-        resultValue.textContent = fmt(thb) + ' ฿';
-        resultUnit.textContent  = `${fmt(krw)} ₩ → ${fmt(thb)} ฿`;
-      } else {
-        resultValue.textContent = '—';
-        resultUnit.textContent  = '';
+        const updated = new Date(data.time_last_update_utc);
+        rateTime.textContent = `마지막 업데이트: ${updated.toLocaleString("ko-KR")}`;
+        recalculate();
+      } catch (e) {
+        if (!thbToKrw) {
+          thbToKrw = 38.5;
+          rateValue.textContent = thbToKrw.toFixed(2);
+          rateTime.textContent = "오프라인 모드 (기본값 사용)";
+        }
+        errorMsg.textContent = "실시간 환율 조회 실패. 최근 값을 사용합니다.";
+        recalculate();
+      } finally {
+        refreshBtn.classList.remove("spinning");
       }
     }
-  }
 
-  // ── 이벤트 ────────────────────────────────────────────
-  thbInput.addEventListener('input', () => { activeField = 'thb'; recalculate(); });
-  krwInput.addEventListener('input', () => { activeField = 'krw'; recalculate(); });
+    function fmt(n) {
+      return n.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
+    }
 
-  refreshBtn.addEventListener('click', fetchRate);
+    function recalculate() {
+      if (!thbToKrw) return;
 
-  document.getElementById('swapBtn').addEventListener('click', () => {
-    activeField = activeField === 'thb' ? 'krw' : 'thb';
-    thbInput.value = '';
-    krwInput.value = '';
-    resultValue.textContent = '—';
-    resultUnit.textContent  = '';
-    thbInput.focus();
-  });
+      if (activeField === "thb") {
+        const thb = parseFloat(thbInput.value);
+        if (!Number.isNaN(thb) && thb >= 0) {
+          const krw = thb * thbToKrw;
+          krwInput.value = "";
+          resultValue.textContent = `${fmt(krw)} KRW`;
+          resultUnit.textContent = `${fmt(thb)} THB → ${fmt(krw)} KRW`;
+        } else {
+          resultValue.textContent = "—";
+          resultUnit.textContent = "";
+        }
+      } else {
+        const krw = parseFloat(krwInput.value);
+        if (!Number.isNaN(krw) && krw >= 0) {
+          const thb = krw / thbToKrw;
+          thbInput.value = "";
+          resultValue.textContent = `${fmt(thb)} THB`;
+          resultUnit.textContent = `${fmt(krw)} KRW → ${fmt(thb)} THB`;
+        } else {
+          resultValue.textContent = "—";
+          resultUnit.textContent = "";
+        }
+      }
+    }
 
-  document.querySelectorAll('.quick-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      thbInput.value = btn.dataset.thb;
-      activeField = 'thb';
+    thbInput.addEventListener("input", () => {
+      activeField = "thb";
       recalculate();
     });
-  });
 
-  // ── 초기 로드 ─────────────────────────────────────────
-  fetchRate();
-</script>
+    krwInput.addEventListener("input", () => {
+      activeField = "krw";
+      recalculate();
+    });
+
+    refreshBtn.addEventListener("click", fetchRate);
+
+    swapBtn.addEventListener("click", () => {
+      activeField = activeField === "thb" ? "krw" : "thb";
+
+      const currentThb = thbInput.value;
+      const currentKrw = krwInput.value;
+      thbInput.value = currentKrw;
+      krwInput.value = currentThb;
+
+      recalculate();
+      if (activeField === "thb") thbInput.focus();
+      else krwInput.focus();
+    });
+
+    document.querySelectorAll(".quick-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        thbInput.value = btn.dataset.thb;
+        activeField = "thb";
+        recalculate();
+      });
+    });
+
+    fetchRate();
+  </script>
 </body>
 </html>
