@@ -353,15 +353,14 @@
       refreshBtn.classList.add("spinning");
       errorMsg.textContent = "";
       try {
-        const res = await fetch("https://open.er-api.com/v6/latest/THB");
+        const res = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/thb.json");
         if (!res.ok) throw new Error("응답 오류");
         const data = await res.json();
-        if (data.result !== "success") throw new Error("데이터 오류");
+        if (!data.thb || !data.thb.krw) throw new Error("데이터 오류");
 
-        thbToKrw = data.rates.KRW;
+        thbToKrw = data.thb.krw;
         rateValue.textContent = thbToKrw.toFixed(2);
-        const updated = new Date(data.time_last_update_utc);
-        rateTime.textContent = `마지막 업데이트: ${updated.toLocaleString("ko-KR")}`;
+        rateTime.textContent = `마지막 업데이트: ${data.date}`;
         recalculate();
       } catch (e) {
         if (!thbToKrw) {
